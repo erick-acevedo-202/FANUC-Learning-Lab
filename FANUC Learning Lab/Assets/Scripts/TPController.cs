@@ -24,7 +24,7 @@ public class TPController : MonoBehaviour
     public Transform[] joints;
     private readonly float[] minLimits = { -720f, -80f, -60f, -190f, -125f, -360f };
     private readonly float[] maxLimits = { 720f, 60f, 170f, 190f, 125f, 360f };
-    private float[] jointAngles = new float[6]; //Currennt Joint Positions 
+    public float[] jointAngles = new float[6]; //Currennt Joint Positions 
 
     public Transform effector;
 
@@ -41,6 +41,7 @@ public class TPController : MonoBehaviour
         {
             if (button.IsPressed)
             {
+                if (mode != "JOINT") return;
                 OnButtonClicked(button.buttonID);
             }
         }
