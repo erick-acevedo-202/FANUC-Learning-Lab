@@ -34,6 +34,36 @@ public class TPController : MonoBehaviour
     private bool LshiftPressed = false;
     private bool RshiftPressed = false;
 
+    [Header("IK Integration")]
+    public IKController ikController;
+    public Vector3 targetPosition;
+    public Quaternion targetOrientation;
+
+    private bool isWorldMode = false; // Track mode
+
+    [Header("Target Integration")]
+    public Transform endEfectorTarget;
+
+    void Start()
+    {
+        if (endEfectorTarget == null)
+            endEfectorTarget = GameObject.Find("EndEfector").transform;
+        if (ikController == null) ikController = GetComponent<IKController>();
+
+        // Inicializar target en una posición alcanzable
+        endEfectorTarget.position = new Vector3(0f, 0f, 0.4f); // 400 mm en Z
+        endEfectorTarget.rotation = Quaternion.Euler(0f, 0f, 0f); // Resetear orientación
+        targetPosition = endEfectorTarget.position;
+        targetOrientation = endEfectorTarget.rotation;
+        isWorldMode = (mode == "WORLD");
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (joints[i] != null) jointAngles[i] = joints[i].localEulerAngles.y;
+        }
+        modeText.text = mode;
+    }
+
     void Update()
     {
         
@@ -94,9 +124,11 @@ public class TPController : MonoBehaviour
         switch (jointIndex)
         {
             case 0:                   
-                rotation = Quaternion.Euler(0f, jointAngles[jointIndex], 0f);
+                rotation = Quaternion.Euler(0f, -jointAngles[jointIndex], 0f);
                 break;
             case 1:
+                rotation = Quaternion.Euler(0f, 0f, -jointAngles[jointIndex]);
+                break;
             case 2:
             case 4:
                 rotation = Quaternion.Euler(0f, 0f, jointAngles[jointIndex]);
@@ -233,12 +265,13 @@ public class TPController : MonoBehaviour
     {
         mode = (mode == "JOINT") ? "WORLD" : "JOINT";
         modeText.text = mode;
+        isWorldMode = (mode == "WORLD");
     }
 
     /// <summary>
     /// Determines joint and direction from button ID and moves it.
     /// </summary>
-    private void HandleJointMovement(string idButton)
+    /*private void HandleJointMovement(string idButton)
     {
         if (idButton.Length != 3 || (idButton[0] != 'n' && idButton[0] != 'p') || idButton[1] != 'J') return;
 
@@ -246,6 +279,60 @@ public class TPController : MonoBehaviour
         if (int.TryParse(idButton[2].ToString(), out int jointIndex) && jointIndex >= 1 && jointIndex <= 6)
         {
             MoveJoints(jointIndex - 1, direction);
+        }
+    }*/
+    private void HandleJointMovement(string idButton)
+    {
+        if (idButton.Length != 3 || (idButton[0] != 'n' && idButton[0] != 'p') || idButton[1] != 'J') return;
+
+        int direction = idButton[0] == 'n' ? -1 : 1;
+        if (int.TryParse(idButton[2].ToString(), out int jointIndex) && jointIndex >= 1 && jointIndex <= 6)
+        {
+            if (isWorldMode)
+            {
+                if (LshiftPressed || RshiftPressed)
+                {
+                    float delta = direction * (velocity / 10f) * Time.deltaTime;
+                    int axis = jointIndex - 1;
+                    if (axis < 3)
+                    {
+                        Vector3 moveDir = (axis == 0 ? Vector3.right : (axis == 1 ? Vector3.up : Vector3.forward));
+                        endEfectorTarget.position += moveDir * delta;
+                    }
+                    else
+                    {
+                        axis -= 3;
+                        Vector3 rotDir = (axis == 0 ? Vector3.right : (axis == 1 ? Vector3.up : Vector3.forward));
+                        float deltaAngle = delta * Mathf.Rad2Deg * 10f;
+                        endEfectorTarget.rotation = Quaternion.AngleAxis(deltaAngle, rotDir) * endEfectorTarget.rotation;
+                    }
+                    targetPosition = endEfectorTarget.position;
+                    targetOrientation = endEfectorTarget.rotation;
+                    Debug.Log($"Target Position: {targetPosition * 1000f} mm, Orientation: {targetOrientation.eulerAngles}");
+
+                    float[] newAngles = ikController.SolveIK(targetPosition, targetOrientation, jointAngles, minLimits, maxLimits);
+                    if (newAngles != null)
+                    {
+                        jointAngles = newAngles;
+                        for (int i = 0; i < 6; i++)
+                        {
+                            ApplyJointMove(i);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No valid IK solution found. Target out of reach or limits exceeded.");
+                    }
+                }
+                else
+                {
+                    Debug.Log("Shift must be Pressed");
+                }
+            }
+            else
+            {
+                MoveJoints(jointIndex - 1, direction);
+            }
         }
     }
 }
