@@ -487,6 +487,39 @@ MonoBehaviour:
     _a: 0
     _d: 0.32
     _theta: 0
+--- !u!1 &929224375
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 929224376}
+  m_Layer: 0
+  m_Name: FANUC R Mate 200iC
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &929224376
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 929224375}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.97579044, y: -0.2098194, z: 0.039862692}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6273693633735656704}
+  - {fileID: 1511597956}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &941939323
 GameObject:
   m_ObjectHideFlags: 0
@@ -764,7 +797,7 @@ MonoBehaviour:
     e00: 1
     e01: 0
     e02: 0
-    e03: -0.00000008676255
+    e03: -0.000000059604645
     e10: 0
     e11: 1
     e12: 0
@@ -772,7 +805,7 @@ MonoBehaviour:
     e20: 0
     e21: 0
     e22: 1
-    e23: 0.0019996976
+    e23: 0.0019996986
     e30: 0
     e31: 0
     e32: 0
@@ -790,13 +823,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1511597954}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.00000008676255, y: -0.17297564, z: 0.0019996976}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.9757904, y: 0.03684376, z: -0.037862994}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1677977391}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 929224376}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1511597957
 MonoBehaviour:
@@ -1588,12 +1621,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6655040084032741306}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 0.97579044, y: 0.2098194, z: -0.039862692}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 929224376}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!4 &6353800984370218361
 Transform:
@@ -1936,5 +1969,4 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1920363921}
-  - {fileID: 6273693633735656704}
-  - {fileID: 1511597956}
+  - {fileID: 929224376}
