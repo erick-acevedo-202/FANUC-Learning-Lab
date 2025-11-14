@@ -5,7 +5,38 @@ using UnityEngine.UI;
 
 public class TPController : MonoBehaviour
 {
+<<<<<<< Updated upstream
     
+=======
+    public Sonido sonido;
+    private bool isMovingThisFrame = false;
+
+
+    // velocidad en JOINT mode
+    [Header("Joint speed (deg/s)")]
+    public float maxJointSpeedDeg = 60f;   // ajústalo hasta que se parezca al robot real
+
+
+    // velocidad en WORLD mode
+    [Header("World speed")]
+    public float maxLinearSpeedMm = 150f;   // mm/s al 100% (ajústalo a ojo)
+    public float maxAngularSpeedDeg = 30f;  // deg/s al 100% (ajústalo también)
+
+
+    [Header("Kinematics Controllers")]
+    public Controller kinematics_controller;
+
+    // --- IK / Cartesian ---
+    public Robot6RSphericalWrist robot;     // arrástralo (el mismo del robot)
+    public Transform baseFrame;              // Frame "Base" del robot
+    public Transform flangeFrame;            // Frame "Flange" (TCP actual)
+
+    [Header("Cartesian Steps")]
+    public float posStepMm = 5f;             // paso en mm para X/Y/Z
+    public float rotStepDeg = 2f;            // paso en grados para Rx/Ry/Rz
+
+    private Matrix4x4 _targetBase;
+>>>>>>> Stashed changes
 
     [Header("Velocity Settings")]
     [Range(1, 100)]
@@ -37,6 +68,8 @@ public class TPController : MonoBehaviour
     void Update()
     {
         
+        isMovingThisFrame = false;
+
         foreach (var button in blueButtons)
         {
             if (button.IsPressed)
@@ -47,15 +80,75 @@ public class TPController : MonoBehaviour
         }
 
 
+        if (sonido != null)
+        {
+            if (isMovingThisFrame)
+            {
+                sonido.StartSoundForVelocity(velocity);
+            }
+            else
+            {
+                sonido.StopSound();
+            }
+        }
     }
+
 
     /// <summary>
     /// Moves the specified joint in the given direction.
     /// </summary>
+    /// 
+
+    public void MoveJoints(int jointIndex, int direction)
+    {
+        // velocity 1..100 -> 0.01..1.0
+        float speedPercent = velocity / 100f;
+
+<<<<<<< Updated upstream
+=======
+
+        // grados por segundo para esta velocidad
+        float speedDegPerSec = maxJointSpeedDeg * speedPercent;
+
+        // cuánto avanzar este frame (deg) = vel(°/s) * tiempo(s)
+        float deltaAngle = direction * speedDegPerSec * Time.deltaTime;
+
+        float nextAngle = jointAngles[jointIndex] + deltaAngle;
+
+>>>>>>> Stashed changes
+        if (LshiftPressed || RshiftPressed)
+        {
+            if (nextAngle > maxLimits[jointIndex])
+            {
+                jointAngles[jointIndex] = maxLimits[jointIndex];
+                Debug.Log($"Joint Max Angle Limit {maxLimits[jointIndex]} Reached");
+            }
+            else if (nextAngle < minLimits[jointIndex])
+            {
+                jointAngles[jointIndex] = minLimits[jointIndex];
+                Debug.Log($"Joint Min Angle Limit {minLimits[jointIndex]} Reached");
+            }
+            else
+            {
+                jointAngles[jointIndex] = nextAngle;
+            }
+
+            ApplyJointMove(jointIndex);
+            isMovingThisFrame = true;
+        }
+        else
+        {
+            Debug.Log("Shift must be Pressed");
+        }
+    }
+
+
+    /*
     public void MoveJoints(int jointIndex, int direction)
     {
         float jointVelocity = velocity;
         float nextAngle = jointAngles[jointIndex] + direction * jointVelocity/100; //ChECAR ESTO
+        float nextAngle = jointAngles[jointIndex] + direction * jointVelocity / 100;
 
         if (LshiftPressed || RshiftPressed)
         {
@@ -76,6 +169,9 @@ public class TPController : MonoBehaviour
             }
 
             ApplyJointMove(jointIndex);
+
+            // marcar que hubo movimiento este frame
+            isMovingThisFrame = true;
         }
         else
         {
@@ -84,6 +180,10 @@ public class TPController : MonoBehaviour
 
         
     }
+
+    */
+
+
 
     /// <summary>
     /// Applies rotation to a joint based on joint index and stored angle.
@@ -249,4 +349,138 @@ public class TPController : MonoBehaviour
             MoveJoints(jointIndex - 1, direction);
         }
     }
+<<<<<<< Updated upstream
 }
+=======
+
+    // jointIndex 1..6 mapea a: X, Y, Z, Rx, Ry, Rz
+
+
+    private void MoveWorld(int jointIndex1Based, int direction)
+    {
+        if (jointIndex1Based < 1 || jointIndex1Based > 6) return;
+
+        // 1..100 -> 0.01..1.0
+        float speedPercent = velocity / 100f;
+
+        // velocidades reales
+        float linSpeedMmPerSec = maxLinearSpeedMm * speedPercent;
+        float rotSpeedDegPerSec = maxAngularSpeedDeg * speedPercent;
+
+        // cuánto se avanza en ESTE frame
+        float stepMm = linSpeedMmPerSec * Time.deltaTime;
+        float stepDeg = rotSpeedDegPerSec * Time.deltaTime;
+
+        if (LshiftPressed || RshiftPressed)
+        {
+            switch (jointIndex1Based)
+            {
+                case 1: // X (tú lo tienes en Z local)
+                    NudgePos(new Vector3(0f, 0f, direction * stepMm));
+                    break;
+
+                case 2: // Y
+                    NudgePos(new Vector3(-direction * stepMm, 0f, 0f));
+                    break;
+
+                case 3: // Z
+                    NudgePos(new Vector3(0f, direction * stepMm, 0f));
+                    break;
+
+                case 4: // Rx
+                    NudgeRot(new Vector3(0f, direction * stepDeg, 0f));
+                    break;
+
+                case 5: // Ry
+                    NudgeRot(new Vector3(direction * stepDeg, 0f, 0f));
+                    break;
+
+                case 6: // Rz
+                    NudgeRot(new Vector3(0f, 0f, direction * stepDeg));
+                    break;
+            }
+
+            // marcar que hubo movimiento este frame (para el sonido)
+            isMovingThisFrame = true;
+        }
+    }
+
+
+    /*
+    private void MoveWorld(int jointIndex1Based, int direction)
+    {
+        if (jointIndex1Based < 1 || jointIndex1Based > 6) return;
+
+        float posStep = posStepMm * Mathf.Max(1, velocity) / 50f;
+        float rotStep = rotStepDeg * Mathf.Max(1, velocity) / 50f;
+
+        if (LshiftPressed || RshiftPressed)
+        {
+            switch (jointIndex1Based)
+            {
+                case 1: NudgePos(new Vector3(0f, 0f, direction * posStep)); break;
+                case 2: NudgePos(new Vector3(-direction * posStep, 0f, 0f)); break;
+                case 3: NudgePos(new Vector3(0f, direction * posStep, 0f)); break;
+                case 4: NudgeRot(new Vector3(0f, direction * rotStep, 0f)); break;
+                case 5: NudgeRot(new Vector3(direction * rotStep, 0f, 0f)); break;
+                case 6: NudgeRot(new Vector3(0f, 0f, direction * rotStep)); break;
+            }
+
+            // también aquí hubo movimiento
+            isMovingThisFrame = true;
+        }
+    }
+
+    */
+  
+
+
+    // Traslación en marco Base (como gizmo Move)
+    private void NudgePos(Vector3 deltaMm)
+    {
+        Vector3 deltaM = deltaMm * 0.001f; // mm -> m
+        _targetBase = Matrix4x4.Translate(deltaM) * _targetBase; // pre-multiplica (ejes de Base)
+        SolveAndApplyIK();
+    }
+
+    // Rotación intrínseca alrededor del TCP (como gizmo Rotate)
+    private void NudgeRot(Vector3 deltaDeg)
+    {
+        _targetBase = _targetBase * Matrix4x4.Rotate(Quaternion.Euler(deltaDeg)); // post-multiplica
+        SolveAndApplyIK();
+    }
+
+    private void SolveAndApplyIK()
+    {
+        var cfg = kinematics_controller.Configuration.Value;
+        var ik = robot.ComputeInverse(_targetBase, cfg, SolutionIgnoreMask.None);
+
+        if (!ik.IsValid)
+        {
+            Debug.LogWarning($"IK inválida");
+            return;
+        }
+
+        var joints = kinematics_controller.MechanicalGroup.Joints;
+
+        // 6 DOF; evita usar .Count en JointTarget
+        int n = Mathf.Min(joints.Count, 6);
+        for (int i = 0; i < n; i++)
+        {
+            float deg = ik.JointTarget[i];   // acceso por indexador
+
+            Vector2 lim = joints[i].Config.Limits;
+            deg = Mathf.Clamp(deg, lim.x, lim.y);
+
+            joints[i].Position.Value = deg;
+        }
+
+        // (opcional) mantiene el gizmo pegado a la solución en mundo
+        var T_base_w = Matrix4x4.TRS(baseFrame.position, baseFrame.rotation, Vector3.one);
+        var T_tcp_w = T_base_w * _targetBase;
+        flangeFrame.SetPositionAndRotation(T_tcp_w.GetColumn(3), T_tcp_w.rotation);
+    }
+
+
+}
+>>>>>>> Stashed changes
