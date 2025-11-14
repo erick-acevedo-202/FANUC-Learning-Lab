@@ -272,8 +272,8 @@ public class TPController : MonoBehaviour
             else
             {
 
-                Debug.Log("Inverse Kinematics HERE");
-                //MoveWorld(jointIndex, direction);
+                //Debug.Log("Inverse Kinematics HERE");
+                MoveWorld(jointIndex, direction);
             }
             
         }
@@ -288,15 +288,33 @@ public class TPController : MonoBehaviour
         float posStep = posStepMm * Mathf.Max(1, velocity) / 50f;   // mm
         float rotStep = rotStepDeg * Mathf.Max(1, velocity) / 50f;  // deg
 
-        switch (jointIndex1Based)
+        if (LshiftPressed || RshiftPressed)
         {
-            case 1: NudgePos(new Vector3(direction * posStep, 0f, 0f)); break; // X
-            case 2: NudgePos(new Vector3(0f, direction * posStep, 0f)); break; // Y
-            case 3: NudgePos(new Vector3(0f, 0f, direction * posStep)); break; // Z
-            case 4: NudgeRot(new Vector3(direction * rotStep, 0f, 0f)); break; // Rx
-            case 5: NudgeRot(new Vector3(0f, direction * rotStep, 0f)); break; // Ry
-            case 6: NudgeRot(new Vector3(0f, 0f, direction * rotStep)); break; // Rz
+            switch (jointIndex1Based)
+            {
+                case 1: NudgePos(new Vector3(0f, 0f, direction * posStep)); break; // X
+                case 2: NudgePos(new Vector3(-direction * posStep, 0f, 0f)); break; // Y
+                case 3: NudgePos(new Vector3(0f, direction * posStep, 0f)); break; // Z
+                case 4: NudgeRot(new Vector3(0f, direction * rotStep, 0f)); break; // Rx
+                case 5: NudgeRot(new Vector3(direction * rotStep, 0f, 0f)); break; // Ry
+                case 6: NudgeRot(new Vector3(0f, 0f, direction * rotStep)); break; // Rz
+
+                    /*
+                     case 1: NudgePos(new Vector3(direction * posStep, 0f, 0f)); break; // X
+                case 2: NudgePos(new Vector3(0f, direction * posStep, 0f)); break; // Y
+                case 3: NudgePos(new Vector3(0f, 0f, direction * posStep)); break; // Z
+                case 4: NudgeRot(new Vector3(direction * rotStep, 0f, 0f)); break; // Rx
+                case 5: NudgeRot(new Vector3(0f, direction * rotStep, 0f)); break; // Ry
+                case 6: NudgeRot(new Vector3(0f, 0f, direction * rotStep)); break; // Rz
+                     */
+            }
+
         }
+
+        
+
+
+            
     }
 
     // Traslación en marco Base (como gizmo Move)
