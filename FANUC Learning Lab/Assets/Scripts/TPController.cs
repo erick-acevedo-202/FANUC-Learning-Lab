@@ -47,6 +47,9 @@ public class TPController : MonoBehaviour
     private bool LshiftPressed = false;
     private bool RshiftPressed = false;
 
+    [Header("Status Indicators")]
+    public TPScreenController TPScreen;
+
     void Awake()
     {
         if (kinematics_controller == null)
@@ -88,6 +91,7 @@ public class TPController : MonoBehaviour
 
         if (LshiftPressed || RshiftPressed)
         {
+            
             // Clamp angle to defined limits
             if (nextAngle > maxLimits[jointIndex])
             {
@@ -109,6 +113,7 @@ public class TPController : MonoBehaviour
         else
         {
             Debug.Log($"Shift must be Pressed");
+            TPScreen.statusFailed();
         }
 
         
@@ -186,6 +191,8 @@ public class TPController : MonoBehaviour
     private void ToggleShift(string shiftType, Image image)
     {
         bool isPressed;
+
+        TPScreen.statusRunningOK();
 
         if (shiftType == "L")
         {
@@ -309,6 +316,10 @@ public class TPController : MonoBehaviour
                      */
             }
 
+        }
+        else
+        {
+            TPScreen.statusFailed();
         }
 
         
