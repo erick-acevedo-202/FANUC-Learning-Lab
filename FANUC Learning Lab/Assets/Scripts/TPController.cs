@@ -272,8 +272,8 @@ public class TPController : MonoBehaviour
             else
             {
 
-                //Debug.Log("Inverse Kinematics HERE");
-                MoveWorld(jointIndex, direction);
+                Debug.Log("Inverse Kinematics HERE");
+                //MoveWorld(jointIndex, direction);
             }
             
         }
